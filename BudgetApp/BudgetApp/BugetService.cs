@@ -49,6 +49,7 @@ namespace BudgetApp
                 NowMonth = all.Where(o => o.YeatMonthDateTime == now).FirstOrDefault();
                 decimal firstAmount = (NowMonth.Amount / DateTime.DaysInMonth(startDateTime.Year, startDateTime.Month)) * firstDay;
 
+
                 decimal middleAmount = 0;
                 if (endDateTime.Month - startDateTime.Month > 1)
                 {
@@ -84,7 +85,7 @@ namespace BudgetApp
 
         private static bool IsOneMonth(DateTime startDateTime, DateTime endDateTime)
         {
-            return startDateTime.Month == endDateTime.Month && startDateTime.Day == 1 && endDateTime.Day == DateTime.DaysInMonth(endDateTime.Year, endDateTime.Month);
+            return startDateTime.ToString("yyyyMM") == endDateTime.ToString("yyyyMM") && startDateTime.Day == 1 && endDateTime.Day == DateTime.DaysInMonth(endDateTime.Year, endDateTime.Month);
         }
     }
 }
