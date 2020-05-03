@@ -14,7 +14,7 @@ namespace BudgetApp
         /// <summary>
         /// 時間
         /// </summary>f
-        public int YeatMonthDateTime { get; set; }
+        public string YeatMonthDateTime { get; set; }
 
 
         /// <summary>

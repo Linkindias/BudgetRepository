@@ -12,13 +12,27 @@ namespace BudgetApp
 {
     public partial class Form1 : Form
     {
+        Check check = new Check();
         public Form1()
         {
             InitializeComponent();
         }
 
-        public void Test()
+        private void Form1_Load(object sender, EventArgs e)
         {
+
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            check.Convert(textBox1.Text);
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show(check.result);
         }
     }
+
+
 }

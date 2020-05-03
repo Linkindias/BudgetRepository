@@ -17,51 +17,77 @@ namespace BudgetApp
 
         public decimal Query(DateTime startDateTime, DateTime endDateTime)
         {
+            if (startDateTime > endDateTime)
+            {
+                return 0;
+            }
 
             var all = this._repo.GetALL()
                                                 .Select(x => new BudgetEntity
                                                 {
-                                                    YeatMonthDateTime = int.Parse(x.YearMonth),
+                                                    YeatMonthDateTime = x.YearMonth,
                                                     Amount = x.Amount
                                                 });
             BudgetEntity NowMonth = null;
 
-            if (startDateTime.Month == endDateTime.Month && startDateTime.Day == 1 && endDateTime.Day == DateTime.DaysInMonth(endDateTime.Year, endDateTime.Month))
+            if (IsOneMonth(startDateTime, endDateTime))
             {
-                var now = int.Parse(startDateTime.ToString("yyyyMM"));
+                var now = startDateTime.ToString("yyyyMM");
                 NowMonth = all.Where(o => startDateTime.Month == endDateTime.Month && o.YeatMonthDateTime == now).FirstOrDefault();
             }
-            else if (startDateTime.Date == endDateTime.Date)
+            else if (IsOneDay(startDateTime, endDateTime))
             {
-                var now = int.Parse(startDateTime.ToString("yyyyMM"));
+                var now = startDateTime.ToString("yyyyMM");
                 NowMonth = all.Where(o => startDateTime.Month == endDateTime.Month && o.YeatMonthDateTime == now).FirstOrDefault();
 
                 return NowMonth.Amount / DateTime.DaysInMonth(startDateTime.Year, startDateTime.Month);
             }
-            else if (startDateTime.Month < endDateTime.Month || startDateTime.Year != endDateTime.Year)
+            else if (IsCrossMonth(startDateTime, endDateTime))
             {
                 int firstDay = DateTime.DaysInMonth(startDateTime.Year, startDateTime.Month) - startDateTime.Day + 1;
-                var now = int.Parse(startDateTime.ToString("yyyyMM"));
+                var now = startDateTime.ToString("yyyyMM");
                 NowMonth = all.Where(o => o.YeatMonthDateTime == now).FirstOrDefault();
                 decimal firstAmount = NowMonth.Amount * (firstDay / DateTime.DaysInMonth(startDateTime.Year, startDateTime.Month));
 
+                decimal middleAmount = 0;
+                if (endDateTime.Month - startDateTime.Month > 1)
+                {
+                    var moveMonth = startDateTime;
+                    for (int i = startDateTime.Month; i < endDateTime.Month; i++)
+                    {
+                        moveMonth.AddMonths(+1);
+                        var middleMonth = moveMonth.ToString("yyyyMM");
+                        var middleBudget = all.Where(o => o.YeatMonthDateTime == middleMonth).FirstOrDefault();
+                        middleAmount += middleBudget.Amount;
+                    }
+                }
+
                 if (endDateTime.Month - startDateTime.Month == 1)
                 {
-                    var nowNext = int.Parse(endDateTime.ToString("yyyyMM"));
+                    var nowNext = endDateTime.ToString("yyyyMM");
                     var NextMonth = all.Where(o => o.YeatMonthDateTime == nowNext).FirstOrDefault();
 
                     decimal lastAmount = (NextMonth.Amount / DateTime.DaysInMonth(endDateTime.Year, endDateTime.Month)) * endDateTime.Day;
-                    return firstAmount + lastAmount;
-                }
-                else if (endDateTime.Month - startDateTime.Month > 1)
-                {
-
+                    return firstAmount + middleAmount + lastAmount;
                 }
             }
 
             return NowMonth.Amount;
         }
 
+        private static bool IsCrossMonth(DateTime startDateTime, DateTime endDateTime)
+        {
+            return startDateTime.Month < endDateTime.Month || startDateTime.Year != endDateTime.Year;
+        }
 
+        private static bool IsOneDay(DateTime startDateTime, DateTime endDateTime)
+        {
+            return startDateTime.Date == endDateTime.Date;
+        }
+
+        private static bool IsOneMonth(DateTime startDateTime, DateTime endDateTime)
+        {
+            return startDateTime.Month == endDateTime.Month && startDateTime.Day == 1 && endDateTime.Day == DateTime.DaysInMonth(endDateTime.Year, endDateTime.Month);
+        }
     }
 }
