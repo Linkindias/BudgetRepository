@@ -47,29 +47,26 @@ namespace BudgetApp
                 int firstDay = DateTime.DaysInMonth(startDateTime.Year, startDateTime.Month) - startDateTime.Day + 1;
                 var now = startDateTime.ToString("yyyyMM");
                 NowMonth = all.Where(o => o.YeatMonthDateTime == now).FirstOrDefault();
-                decimal firstAmount = NowMonth.Amount * (firstDay / DateTime.DaysInMonth(startDateTime.Year, startDateTime.Month));
+                decimal firstAmount = (NowMonth.Amount / DateTime.DaysInMonth(startDateTime.Year, startDateTime.Month)) * firstDay;
 
                 decimal middleAmount = 0;
                 if (endDateTime.Month - startDateTime.Month > 1)
                 {
-                    var moveMonth = startDateTime;
-                    for (int i = startDateTime.Month; i < endDateTime.Month; i++)
+                    var moveMonth = startDateTime.AddMonths(1);
+                    for (int i = moveMonth.Month; i < endDateTime.Month; i++)
                     {
-                        moveMonth.AddMonths(+1);
                         var middleMonth = moveMonth.ToString("yyyyMM");
                         var middleBudget = all.Where(o => o.YeatMonthDateTime == middleMonth).FirstOrDefault();
                         middleAmount += middleBudget.Amount;
+                        moveMonth = moveMonth.AddMonths(1);
                     }
                 }
 
-                if (endDateTime.Month - startDateTime.Month == 1)
-                {
-                    var nowNext = endDateTime.ToString("yyyyMM");
-                    var NextMonth = all.Where(o => o.YeatMonthDateTime == nowNext).FirstOrDefault();
+                var nowNext = endDateTime.ToString("yyyyMM");
+                var NextMonth = all.Where(o => o.YeatMonthDateTime == nowNext).FirstOrDefault();
 
-                    decimal lastAmount = (NextMonth.Amount / DateTime.DaysInMonth(endDateTime.Year, endDateTime.Month)) * endDateTime.Day;
-                    return firstAmount + middleAmount + lastAmount;
-                }
+                decimal lastAmount = (NextMonth.Amount / DateTime.DaysInMonth(endDateTime.Year, endDateTime.Month)) * endDateTime.Day;
+                return firstAmount + middleAmount + lastAmount;
             }
 
             return NowMonth.Amount;
